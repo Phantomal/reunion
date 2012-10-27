@@ -5,16 +5,29 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.annotation.PostConstruct;
+
 import org.reunionemu.jcommon.Parser;
 import org.reunionemu.jreunion.server.beans.SpringApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
 
 /**
  * @author Aidamina
  * @license http://reunion.googlecode.com/svn/trunk/license.txt
  */
+@Service
 public class Reference {
+	
+	
+	@Autowired
+	ApplicationContext context;
+
+	public ApplicationContext getContext() {
+		return context;
+	}
 
 	private synchronized static void createInstance() {
 		if (_instance == null) {
@@ -24,7 +37,8 @@ public class Reference {
 
 	public static Reference getInstance() {
 		if (_instance == null) {
-			createInstance();
+			throw new RuntimeException();
+			//createInstance();
 		}
 		return _instance;
 	}
@@ -43,7 +57,8 @@ public class Reference {
 	private static Reference _instance = null;
 
 	public Reference() {
-		super();
+		
+		
 		itemReference = new Parser();
 		mobReference = new Parser();
 		expReference = new Parser();
@@ -53,6 +68,7 @@ public class Reference {
 		serverReference = new Parser();
 		dropListReference = new Parser();
 		skillReference = new Parser();
+		_instance = this;
 	}
 
 	public void clear() {
@@ -110,6 +126,7 @@ public class Reference {
 		this.skillReference = skillReference;
 	}
 
+	@PostConstruct
 	public void Load(){
 		clear();
 		try {
@@ -117,23 +134,38 @@ public class Reference {
 		
 			mapConfigReference.Parse("config/Maps.dta");
 	
-			itemReference.Parse(getDataResource("Items.dta"));
-			mobReference.Parse(getDataResource("Mob.dta"));
-			expReference.Parse(getDataResource("ExpTable.dta"));
-			mapReference.Parse(getDataResource("Maps.dta"));
-			npcReference.Parse(getDataResource("Npc.dta"));
-			dropListReference.Parse(getDataResource("DropList.dta"));
-			skillReference.Parse(getDataResource("Skills.dta"));
+			itemReference.Parse(getDataResourceS("Items.dta"));
+			mobReference.Parse(getDataResourceS("Mob.dta"));
+			expReference.Parse(getDataResourceS("ExpTable.dta"));
+			mapReference.Parse(getDataResourceS("Maps.dta"));
+			npcReference.Parse(getDataResourceS("Npc.dta"));
+			dropListReference.Parse(getDataResourceS("DropList.dta"));
+			skillReference.Parse(getDataResourceS("Skills.dta"));
 		
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
+	}
+	
+	
+	public InputStream getDataResourceS(String filename){
+		String dataPath = getServerReference().getItem("Server").getMemberValue("DataPath");
+		//ApplicationContext context = SpringApplicationContext.getApplicationContext();
+		String path = new File(dataPath, filename).getPath();
+		try{
+			if(context!=null){
+				return context.getResource(path).getInputStream();
+			}else{
+				return new FileInputStream(path);
+			}
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public static InputStream getDataResource(String filename){
 		String dataPath = getInstance().getServerReference().getItem("Server").getMemberValue("DataPath");
-		ApplicationContext context = SpringApplicationContext.getApplicationContext();
+		ApplicationContext context = getInstance().getContext();
 		String path = new File(dataPath, filename).getPath();
 		try{
 			if(context!=null){
