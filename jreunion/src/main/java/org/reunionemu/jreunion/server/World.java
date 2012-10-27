@@ -26,6 +26,7 @@ import org.reunionemu.jreunion.events.server.ServerEvent;
 import org.reunionemu.jreunion.events.server.ServerStartEvent;
 import org.reunionemu.jreunion.events.server.ServerStopEvent;
 import org.reunionemu.jreunion.game.BulkanPlayer;
+import org.reunionemu.jreunion.game.ItemType;
 import org.reunionemu.jreunion.game.Pet;
 import org.reunionemu.jreunion.game.Pet.PetStatus;
 import org.reunionemu.jreunion.game.Player;
@@ -33,12 +34,14 @@ import org.reunionemu.jreunion.game.skills.bulkan.RecoveryBoost;
 import org.reunionemu.jreunion.server.PacketFactory.Type;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 
 /**
  * @author Aidamina
  * @license http://reunion.googlecode.com/svn/trunk/license.txt
  */
+@DependsOn("database")
 @Service
 public class World extends EventDispatcher implements EventListener, Sendable {
 	
@@ -81,6 +84,7 @@ public class World extends EventDispatcher implements EventListener, Sendable {
 		skillManager = new SkillManager();
 		playerManager = new PlayerManager();
 		itemManager = new ItemManager();
+		new ItemType(229);
 		npcManager = new NpcManager();
 		petManager = new PetManager();
 		petManager.loadPets();
